@@ -10,6 +10,13 @@ import static org.hamcrest.Matchers.equalTo;
 public class RestAssuredTest {
 
 
+    String ninjaToken = "yzjako2f7h8l0e6m3eibik6p4grkrjjr";
+    String clientHttp = "http://79.137.68.21/api/v1/clients";
+    String client117 = "/117";
+    String contentType = "Content-Type";
+    String appJson = "application/json";
+
+
     @DataProvider(name="creatingClientsWithSpecificNames")
     public Object[][] createTestDataRecords() {
         return new Object[][] {
@@ -22,9 +29,9 @@ public class RestAssuredTest {
 
     @Test
     public void get(){
-        Response response = given().header("Content-Type", "application/json").
-                and().header("X-Ninja-Token", "yzjako2f7h8l0e6m3eibik6p4grkrjjr").
-                when().get("http://79.137.68.21/api/v1/clients/117").
+        Response response = given().header(contentType, appJson).
+                and().header("X-Ninja-Token", ninjaToken).
+                when().get(clientHttp + client117).
                 then().assertThat().
                 statusCode(200).body("data.name",equalTo("SoapUITest1")).extract().response();
 
@@ -34,21 +41,25 @@ public class RestAssuredTest {
 
     @Test(dataProvider = "creatingClientsWithSpecificNames")
     public void post(String name, String city){
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("name", name);
-        jsonObject.addProperty("city", city);
 
-        Response response = given().header("Content-Type", "application/json").
-                and().header("X-Ninja-Token", "yzjako2f7h8l0e6m3eibik6p4grkrjjr").
-                body(jsonObject.toString()).
-                when().post("http://79.137.68.21/api/v1/clients").
+        Response response = given().header(contentType, appJson).
+                and().header("X-Ninja-Token", ninjaToken).
+                body(createJson(name, city).toString()).
+                when().post(clientHttp).
                 then().assertThat().
                 statusCode(200).and().assertThat().body("data.name",equalTo(name)).
-                and().assertThat().header("Content-Type", equalTo("application/json")).
+                and().assertThat().header("Content-Type", equalTo(appJson)).
                 extract().response();
 
         ResponseBody responseBody = response.getBody();
         System.out.println(responseBody.asString());
+    }
+
+    public JsonObject createJson(String name, String city){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", name);
+        jsonObject.addProperty("city", city);
+        return jsonObject;
     }
 }
 
